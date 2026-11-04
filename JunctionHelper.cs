@@ -22,6 +22,21 @@ namespace MDSync
             }
         }
 
+        public static void DeleteDirectoryOrJunction(string path)
+        {
+            if (!Directory.Exists(path))
+                return;
+
+            if (IsReparsePoint(path))
+            {
+                Directory.Delete(path, false);
+            }
+            else
+            {
+                Directory.Delete(path, true);
+            }
+        }
+
         public static (bool Success, string Message) CreateJunction(string linkPath, string targetPath)
         {
             try
@@ -32,17 +47,7 @@ namespace MDSync
                     Directory.CreateDirectory(parent);
                 }
 
-                if (Directory.Exists(linkPath))
-                {
-                    if (IsReparsePoint(linkPath))
-                    {
-                        Directory.Delete(linkPath, false);
-                    }
-                    else
-                    {
-                        Directory.Delete(linkPath, true);
-                    }
-                }
+                DeleteDirectoryOrJunction(linkPath);
 
                 var psi = new ProcessStartInfo
                 {

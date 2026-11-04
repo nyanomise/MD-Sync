@@ -43,6 +43,7 @@ The tool is intentionally built with a minimalist, clean Windows-native look:
 - **Game Path:** Auto-detected with a manual "Browse..." button.
 - **Account List:** Shows Account folder names, physical storage size, and link status (*Master / Linked / Unlinked*).
 - **One-Click Sync:** Automatically cleans incomplete data in secondary accounts and applies directory junctions in under 2 seconds.
+- **Set as Master:** Select any account and click `Set as Master` to instantly migrate physical game assets and re-link all other accounts.
 
 ---
 

@@ -42,6 +42,7 @@ Phần mềm được thiết kế theo phong cách tối giản, chuẩn Native
 - **Đường dẫn Master Duel:** Tự động nhận diện, có nút "Chọn..." để duyệt thủ công nếu cần.
 - **Danh sách tài khoản:** Hiển thị rõ mã thư mục, dung lượng thực tế, và trạng thái (*Chính / Đã liên kết / Chưa liên kết*).
 - **Thao tác 1-Click:** Tự động dọn dẹp data rác/dở dang của acc phụ và tạo liên kết Junction chỉ trong vòng 1-2 giây.
+- **Đổi Master (Set as Master):** Chọn bất kỳ tài khoản nào và bấm `Set as Master` để chuyển dữ liệu gốc sang tài khoản đó và tự động cập nhật lại toàn bộ liên kết.
 
 ---
 
