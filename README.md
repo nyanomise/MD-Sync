@@ -31,7 +31,7 @@
 1. Download the latest **`MD-Sync.exe`** from the [Releases](../../releases) tab.
 2. Log into your new Steam account and launch Master Duel once until the title screen loads (this allows the game to generate its account folder in `LocalData`), then exit the game.
 3. Open **`MD-Sync.exe`**. It will automatically find your game directory and list all detected accounts.
-4. Click **`Đồng bộ (Sync)`**.
+4. Click **`Sync All`**.
 5. Launch Master Duel on your new account — the download will instantly hit 100% and jump straight into the game!
 
 ---

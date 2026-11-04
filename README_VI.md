@@ -31,7 +31,7 @@
 1. Tải file **`MD-Sync.exe`** mới nhất từ mục [Releases](../../releases).
 2. Đăng nhập tài khoản Steam mới, mở game Master Duel lên cho đến màn hình Title (mục đích để game tự tạo thư mục tài khoản mới trong `LocalData`), sau đó tắt game.
 3. Mở **`MD-Sync.exe`** lên. Tool sẽ tự động tìm thấy đường dẫn game và hiển thị danh sách tài khoản.
-4. Bấm nút **`Đồng bộ (Sync)`**.
+4. Bấm nút **`Sync All`**.
 5. Mở lại game trên acc mới -> Thanh tải dữ liệu sẽ nhảy thẳng 100% và vào game ngay lập tức!
 
 ---

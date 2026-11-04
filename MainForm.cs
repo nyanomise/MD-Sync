@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -39,10 +38,10 @@ namespace MDSync
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
 
-            // 1. Thư mục cài đặt game
+            // 1. Game Directory
             var lblPath = new Label
             {
-                Text = "Đường dẫn Master Duel:",
+                Text = "Game Directory:",
                 Location = new Point(14, 14),
                 AutoSize = true
             };
@@ -59,7 +58,7 @@ namespace MDSync
 
             btnBrowse = new Button
             {
-                Text = "Chọn...",
+                Text = "Browse...",
                 Location = new Point(472, 33),
                 Size = new Size(80, 25),
                 Anchor = AnchorStyles.Top | AnchorStyles.Right
@@ -67,7 +66,7 @@ namespace MDSync
             btnBrowse.Click += BtnBrowse_Click;
             Controls.Add(btnBrowse);
 
-            // 2. Danh sách tài khoản (ListView đơn giản, sạch sẽ)
+            // 2. Accounts List
             lvAccounts = new ListView
             {
                 Location = new Point(14, 68),
@@ -78,19 +77,19 @@ namespace MDSync
                 MultiSelect = false,
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
-            lvAccounts.Columns.Add("Tài khoản (Folder)", 160);
-            lvAccounts.Columns.Add("Dung lượng", 120);
-            lvAccounts.Columns.Add("Trạng thái", 250);
+            lvAccounts.Columns.Add("Account ID", 160);
+            lvAccounts.Columns.Add("Size", 120);
+            lvAccounts.Columns.Add("Status", 250);
 
             lvAccounts.Resize += (s, e) => AutoFitLastColumn();
             Controls.Add(lvAccounts);
 
-            // 3. Nút bấm hành động
+            // 3. Action Buttons
             btnSync = new Button
             {
-                Text = "Đồng bộ (Sync)",
+                Text = "Sync All",
                 Location = new Point(14, 328),
-                Size = new Size(130, 30),
+                Size = new Size(110, 30),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Left
             };
             btnSync.Click += BtnSync_Click;
@@ -98,19 +97,19 @@ namespace MDSync
 
             btnRefresh = new Button
             {
-                Text = "Làm mới",
-                Location = new Point(152, 328),
+                Text = "Refresh",
+                Location = new Point(132, 328),
                 Size = new Size(90, 30),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Left
             };
             btnRefresh.Click += (s, e) => ScanAccountsAsync();
             Controls.Add(btnRefresh);
 
-            // 4. Thanh trạng thái ở đáy
+            // 4. Status Bar
             statusStrip = new StatusStrip();
             lblStatus = new ToolStripStatusLabel
             {
-                Text = "Sẵn sàng"
+                Text = "Ready"
             };
             statusStrip.Items.Add(lblStatus);
             Controls.Add(statusStrip);
@@ -137,7 +136,7 @@ namespace MDSync
             }
             else
             {
-                lblStatus.Text = "Không tự tìm thấy game. Vui lòng bấm 'Chọn...'";
+                lblStatus.Text = "Game path not found automatically. Please click 'Browse...'";
             }
         }
 
@@ -145,7 +144,7 @@ namespace MDSync
         {
             using var fbd = new FolderBrowserDialog
             {
-                Description = "Chọn thư mục game Yu-Gi-Oh! Master Duel"
+                Description = "Select Yu-Gi-Oh! Master Duel installation directory"
             };
             if (fbd.ShowDialog() == DialogResult.OK)
             {
@@ -165,11 +164,11 @@ namespace MDSync
             {
                 accounts.Clear();
                 lvAccounts.Items.Clear();
-                lblStatus.Text = "Không tìm thấy thư mục LocalData.";
+                lblStatus.Text = "LocalData directory not found.";
                 return;
             }
 
-            lblStatus.Text = "Đang quét danh sách tài khoản...";
+            lblStatus.Text = "Scanning accounts...";
             btnRefresh.Enabled = false;
             btnSync.Enabled = false;
 
@@ -213,28 +212,23 @@ namespace MDSync
                 foreach (var acc in accounts)
                 {
                     var item = new ListViewItem(acc.AccountId);
-                    item.SubItems.Add(acc.IsAssetLinked ? "Liên kết" : JunctionHelper.FormatBytes(acc.AssetSize));
-
-                    string statusText = acc.IsMaster
-                        ? "Chính (Master)"
-                        : (acc.IsAssetLinked ? "Đã liên kết" : "Chưa liên kết");
-
-                    item.SubItems.Add(statusText);
+                    item.SubItems.Add(acc.IsAssetLinked ? "Linked" : JunctionHelper.FormatBytes(acc.AssetSize));
+                    item.SubItems.Add(acc.DisplayStatus);
                     lvAccounts.Items.Add(item);
                 }
 
                 if (currentMasterId != null)
                 {
-                    lblStatus.Text = $"Đã tìm thấy {accounts.Count} tài khoản. Tài khoản chính: [{currentMasterId}].";
+                    lblStatus.Text = $"Found {accounts.Count} account(s). Master: [{currentMasterId}].";
                 }
                 else
                 {
-                    lblStatus.Text = $"Tìm thấy {accounts.Count} tài khoản (chưa có dữ liệu tải về).";
+                    lblStatus.Text = $"Found {accounts.Count} account(s) (no downloaded game assets found).";
                 }
             }
             catch (Exception ex)
             {
-                lblStatus.Text = $"Lỗi: {ex.Message}";
+                lblStatus.Text = $"Error: {ex.Message}";
             }
             finally
             {
@@ -247,27 +241,27 @@ namespace MDSync
         {
             if (string.IsNullOrEmpty(currentMasterId))
             {
-                MessageBox.Show("Không tìm thấy tài khoản chính có dữ liệu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("No master account with downloaded data found!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             var masterAcc = accounts.FirstOrDefault(a => a.AccountId == currentMasterId);
             if (masterAcc == null || !Directory.Exists(masterAcc.AssetPath))
             {
-                MessageBox.Show("Thư mục dữ liệu chính (0000) không tồn tại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Master data directory (0000) does not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             var targets = accounts.Where(a => a.AccountId != currentMasterId).ToList();
             if (targets.Count == 0)
             {
-                MessageBox.Show("Chưa có tài khoản phụ nào trong LocalData để đồng bộ.\n(Hãy đăng nhập acc Steam mới vào game trước để game tạo thư mục).", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("No secondary accounts found in LocalData to sync.\n(Log into your new Steam account and launch the game once to create its folder first).", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             btnSync.Enabled = false;
             btnRefresh.Enabled = false;
-            lblStatus.Text = "Đang đồng bộ dữ liệu...";
+            lblStatus.Text = "Synchronizing data...";
 
             int success = 0;
             int failed = 0;
@@ -278,7 +272,7 @@ namespace MDSync
                 {
                     try
                     {
-                        // 1. Link 0000
+                        // 1. Link 0000 (game assets)
                         var (assetOk, _) = JunctionHelper.CreateJunction(target.AssetPath, masterAcc.AssetPath);
                         if (!assetOk)
                         {
@@ -286,7 +280,7 @@ namespace MDSync
                             continue;
                         }
 
-                        // 2. Link localsave (ngầm)
+                        // 2. Link localsave (settings) silently
                         if (Directory.Exists(masterAcc.LocalSavePath))
                         {
                             JunctionHelper.CreateJunction(target.LocalSavePath, masterAcc.LocalSavePath);
@@ -305,13 +299,13 @@ namespace MDSync
 
             if (failed == 0)
             {
-                lblStatus.Text = $"Đã đồng bộ thành công {success} tài khoản.";
-                MessageBox.Show($"Đồng bộ thành công {success} tài khoản!\nBạn có thể vào game chơi ngay.", "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                lblStatus.Text = $"Synchronized {success} account(s) successfully.";
+                MessageBox.Show($"Successfully synchronized {success} account(s)!\nYou can now launch the game.", "Completed", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                lblStatus.Text = $"Đồng bộ xong ({success} thành công, {failed} lỗi).";
-                MessageBox.Show($"Có {failed} tài khoản gặp lỗi trong quá trình liên kết.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                lblStatus.Text = $"Sync finished ({success} succeeded, {failed} failed).";
+                MessageBox.Show($"{failed} account(s) failed to link.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }

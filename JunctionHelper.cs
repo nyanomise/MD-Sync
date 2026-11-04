@@ -26,24 +26,20 @@ namespace MDSync
         {
             try
             {
-                // Đảm bảo thư mục cha của link tồn tại
                 var parent = Path.GetDirectoryName(linkPath);
                 if (!string.IsNullOrEmpty(parent) && !Directory.Exists(parent))
                 {
                     Directory.CreateDirectory(parent);
                 }
 
-                // Nếu thư mục link đang tồn tại:
                 if (Directory.Exists(linkPath))
                 {
                     if (IsReparsePoint(linkPath))
                     {
-                        // Đã là junction rồi, xóa junction cũ đi để tạo lại
                         Directory.Delete(linkPath, false);
                     }
                     else
                     {
-                        // Là thư mục thường -> xóa nội dung bên trong
                         Directory.Delete(linkPath, true);
                     }
                 }
@@ -60,7 +56,7 @@ namespace MDSync
 
                 using var process = Process.Start(psi);
                 if (process == null)
-                    return (false, "Không thể khởi chạy cmd.exe.");
+                    return (false, "Failed to start cmd.exe.");
 
                 string output = process.StandardOutput.ReadToEnd();
                 string err = process.StandardError.ReadToEnd();

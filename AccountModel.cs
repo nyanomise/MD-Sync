@@ -23,12 +23,10 @@ namespace MDSync
             get
             {
                 if (IsMaster)
-                    return "⭐ Nguồn chính (Master)";
+                    return "Master";
                 if (IsAssetLinked)
-                    return "🔗 Đã liên kết (Linked)";
-                if (HasAssetFolder && AssetSize > 100 * 1024 * 1024)
-                    return $"⚠️ Độc lập ({JunctionHelper.FormatBytes(AssetSize)})";
-                return "⚠️ Chưa liên kết";
+                    return "Linked";
+                return "Unlinked";
             }
         }
     }
